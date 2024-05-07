@@ -87,6 +87,7 @@ import {
   parseCsPkgLockData,
   parseCsProjAssetsData,
   parseCsProjData,
+  parseDotnetDepsJson,
   parseEdnData,
   parseGemfileLockData,
   parseGitHubWorkflowData,
@@ -4566,6 +4567,11 @@ export async function createCsharpBom(path, options) {
     `${options.multiProject ? "**/" : ""}*.nupkg`,
     options,
   );
+  const depsFiles = getAllFiles(
+    path,
+    `${options.multiProject ? "**/" : ""}*deps.json`,
+    options,
+  );
   // Support for automatic restore
   if (
     options.installDeps &&
@@ -4723,6 +4729,16 @@ export async function createCsharpBom(path, options) {
       }
       if (deps?.length) {
         dependencies = mergeDependencies(dependencies, deps, parentComponent);
+      }
+    }
+  }
+  if (depsFiles?.length) {
+    manifestFiles = manifestFiles.concat(depsFiles);
+    // .deps.json parsing
+    for (const f of depsFiles) {
+      const dlist = await parseDotnetDepsJson(f);
+      if (dlist?.length) {
+        pkgList = pkgList.concat(dlist);
       }
     }
   }

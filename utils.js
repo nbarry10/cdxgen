@@ -10250,3 +10250,53 @@ export function addEvidenceForDotnet(pkgList, slicesFile) {
   }
   return pkgList;
 }
+
+/**
+ * Parse .deps.json file specific to .NET Core and .NET 5+ applications
+ *
+ * @param {string} depsFile .deps.json file
+ */
+export async function parseDotnetDepsJson(depsFile) {
+  let pkgList = [];
+
+  if (!existsSync(depsFile)) {
+    return pkgList;
+  }
+
+  const depsJson = JSON.parse(readFileSync(depsFile, "utf8"));
+
+  for (const key of Object.keys(depsJson.libraries)) {
+    const lib = depsJson.libraries[key];
+    const parts = key.split('/');
+    const library = parts[0];
+    const version = parts[1];
+
+    pkgList.push({
+      group: "",
+      name: library || "",
+      version: version || "",
+      scope: "required",
+      properties: [
+        {
+          name: "SrcFile",
+          value: depsFile,
+        },
+      ],
+      evidence: {
+        identity: {
+          field: "purl",
+          confidence: 1,
+          methods: [
+            {
+              technique: "manifest-analysis",
+              confidence: 1,
+              value: depsFile,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  return pkgList;
+}

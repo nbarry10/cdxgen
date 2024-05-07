@@ -159,6 +159,12 @@ export function parsePnpmLock(
  */
 export function parseBowerJson(bowerJsonFile: string): Promise<any[]>;
 /**
+ * Parse .deps.json file specific to .NET Core and .NET 5+ applications
+ *
+ * @param {string} depsFile .deps.json file
+ */
+export function parseDotnetDepsJson(depsFile: string): Promise<any[]>;
+/**
  * Parse minified js file
  *
  * @param {string} minJsFile min.js file
