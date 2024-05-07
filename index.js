@@ -93,6 +93,7 @@ import {
   parseCsPkgLockData,
   parseCsPkgData,
   parseCsProjData,
+  parseDotnetDepsJson,
   parsePaketLockData,
   DEBUG_MODE,
   parsePyProjectToml,
@@ -4321,6 +4322,11 @@ export const createCsharpBom = async (path, options) => {
     (options.multiProject ? "**/" : "") + "*.nupkg",
     options
   );
+  const depsFiles = getAllFiles(
+    path,
+    `${options.multiProject ? "**/" : ""}*deps.json`,
+    options,
+  );
   let pkgList = [];
   if (nupkgFiles.length && projAssetsFiles.length === 0) {
     manifestFiles = manifestFiles.concat(nupkgFiles);
@@ -4434,6 +4440,16 @@ export const createCsharpBom = async (path, options) => {
       }
       if (deps && deps.length) {
         dependencies = mergeDependencies(dependencies, deps, parentComponent);
+      }
+    }
+  }
+  if (depsFiles?.length) {
+    manifestFiles = manifestFiles.concat(depsFiles);
+    // .deps.json parsing
+    for (const f of depsFiles) {
+      const dlist = await parseDotnetDepsJson(f);
+      if (dlist?.length) {
+        pkgList = pkgList.concat(dlist);
       }
     }
   }

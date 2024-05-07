@@ -33,6 +33,7 @@ import {
   parseCsProjData,
   parseCsProjAssetsData,
   parseCsPkgLockData,
+  parseDotnetDepsJson,
   parsePaketLockData,
   getNugetMetadata,
   parsePom,
@@ -3325,4 +3326,11 @@ test("parseCmakeLikeFile tests", () => {
     version: "20230125.1"
   });
   expect(retMap.pkgList.length).toEqual(2);
+});
+
+test("parseDotnetDepsJson", async () => {
+  const deps = await parseDotnetDepsJson("./test/data/my-app.deps.json");
+  expect(deps.length).toEqual(4);
+  expect(deps[0].name).toEqual("my-app");
+  expect(deps[0].version).toEqual("1.0.0");
 });
